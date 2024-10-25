@@ -37,7 +37,7 @@
 
     <!-- Email Input Field -->
     <EditText
-        android:id="@+id/email"
+        android:id="@+id/username"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="@string/create_user_page_username_text"
@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/create_user_page_password1_text"
         android:inputType="textPassword"
-        app:layout_constraintTop_toBottomOf="@id/email"
+        app:layout_constraintTop_toBottomOf="@id/username"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"
