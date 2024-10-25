@@ -17,7 +17,7 @@ class create_user_page : AppCompatActivity() {
         setContentView(R.layout.activity_create_user_page)
         // Get references to UI elements
         val fullName = findViewById<EditText>(R.id.full_name)
-        val email = findViewById<EditText>(R.id.email)
+        val username = findViewById<EditText>(R.id.username)
         val password = findViewById<EditText>(R.id.password)
         val confirmPassword = findViewById<EditText>(R.id.confirm_password)
         val createAccountButton = findViewById<Button>(R.id.create_account_button)
