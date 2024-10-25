@@ -16,7 +16,7 @@ class home_page : AppCompatActivity() {
         setContentView(R.layout.activity_home_page)
         // Set up the toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-
+        setSupportActionBar(toolbar)  // Set the Toolbar as the app's action bar
     }
     // Inflate the menu
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
