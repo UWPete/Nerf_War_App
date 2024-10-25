@@ -40,7 +40,7 @@
         android:id="@+id/email"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="@string/create_user_page_email_text"
+        android:hint="@string/create_user_page_username_text"
         android:inputType="textEmailAddress"
         app:layout_constraintTop_toBottomOf="@id/full_name"
         app:layout_constraintStart_toStartOf="parent"
