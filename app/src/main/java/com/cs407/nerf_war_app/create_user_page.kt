@@ -1,5 +1,6 @@
 package com.cs407.nerf_war_app
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -25,9 +26,11 @@ class create_user_page : AppCompatActivity() {
         createAccountButton.setOnClickListener {
             // Simple validation
             if (password.text.toString() == confirmPassword.text.toString()) {
-                // TODO: Perform account creation logic (e.g., save user data, navigate to home page, etc.)
+                // TODO: Perform account creation logic (e.g., save user data, etc.)
                 Toast.makeText(this, "Account Created Successfully!", Toast.LENGTH_SHORT).show()
-                // You can redirect the user to another activity here
+                // Go back to User Sign In page
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)  // Start the new activity
             } else {
                 Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
             }
