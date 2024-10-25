@@ -19,11 +19,19 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // Find the Sign In button and set a click listener to navigate to home_page.kt
+        // Find the Sign In button and set a click listener to navigate to welcome page
         val signInButton = findViewById<Button>(R.id.sign_in_button)
         signInButton.setOnClickListener {
             // Create an Intent to navigate to HomePageActivity (home_page.kt)
             val intent = Intent(this, home_page::class.java)
+            startActivity(intent)  // Start the new activity
+        }
+
+        // Find the Create User button and set a click listener to navigate to create user page
+        val newUserButton = findViewById<Button>(R.id.create_user_button)
+        newUserButton.setOnClickListener {
+            // Create an Intent to navigate to HomePageActivity (home_page.kt)
+            val intent = Intent(this, create_user_page::class.java)
             startActivity(intent)  // Start the new activity
         }
     }
