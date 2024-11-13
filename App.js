@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, ScrollView } from 'react-nat
 import { initializeApp } from '@firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from '@firebase/auth';
 import AuthenticatedScreen from './AuthenticatedScreen';
+import MainDashboard from './MainDashboard';
 
 
 
@@ -21,9 +22,9 @@ const app = initializeApp(firebaseConfig);
 const AuthScreen = ({ email, setEmail, password, setPassword, isLogin, setIsLogin, handleAuthentication }) => {
   return (
     <View style={styles.authContainer}>
-       <Text style={styles.title}>{isLogin ? 'Sign In' : 'Sign Up'}</Text>
+      <Text style={styles.title}>{isLogin ? 'Sign In' : 'Sign Up'}</Text>
 
-       <TextInput
+      <TextInput
         style={styles.input}
         value={email}
         onChangeText={setEmail}
@@ -65,8 +66,8 @@ export default App = () => {
     return () => unsubscribe();
   }, [auth]);
 
-  
-  const handleAuthentication = async () => {
+
+  const handleAuthentication = async ({ navigation }) => {
     try {
       if (user) {
         // If user is already authenticated, log out
@@ -78,10 +79,12 @@ export default App = () => {
           // Sign in
           await signInWithEmailAndPassword(auth, email, password);
           console.log('User signed in successfully!');
+          navigation.navigate(MainDashboard); // Navigate to main_dashboard
         } else {
           // Sign up
           await createUserWithEmailAndPassword(auth, email, password);
           console.log('User created successfully!');
+          navigation.navigate(MainDashboard); // Navigate to main_dashboard
         }
       }
     } catch (error) {
