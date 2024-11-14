@@ -8,7 +8,7 @@ import MainDashboard from './MainDashboard';
 
 
 const firebaseConfig = {
-  apiKey: "Insert API key here",
+  apiKey: "Insert API Key",
   authDomain: "nerfwarapp.firebaseapp.com",
   projectId: "nerfwarapp",
   storageBucket: "nerfwarapp.firebasestorage.app",
