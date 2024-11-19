@@ -13,7 +13,7 @@ import CreateGameScreen from './CreateGameScreen';
 import JoinGameScreen from './JoinGameScreen';
 import PlayersScreen from './PlayersScreen';
 import TeamsScreen from './TeamsScreen';
-import GameManagementScreen from './GameManagementScreen'; // New import
+import GameManagementScreen from './GameManagementScreen'; // Import the GameManagementScreen
 
 const Stack = createStackNavigator();
 
@@ -24,10 +24,8 @@ export default function App() {
     // Listen for authentication state changes
     const unsubscribe = onAuthStateChanged(auth, (authenticatedUser) => {
       if (authenticatedUser) {
-        console.log('User is signed in:', authenticatedUser.email);
         setUser(authenticatedUser);
       } else {
-        console.log('User is signed out');
         setUser(null);
       }
     });

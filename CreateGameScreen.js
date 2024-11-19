@@ -2,25 +2,15 @@
 
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Alert, Text, TouchableOpacity } from 'react-native';
-import { auth, db } from './firebaseConfig';
-import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 
 const CreateGameScreen = () => {
   const [gameName, setGameName] = useState('');
   const [location, setLocation] = useState('');
   const [maxPlayers, setMaxPlayers] = useState('');
-  const navigation = useNavigation();
+  const navigation = useNavigation(); // Use navigation from React Navigation
 
-  const createGame = async () => {
-    Alert.alert('Debug', 'CreateGame function called'); // Debugging statement
-
-    // Check if user is authenticated
-    if (!auth.currentUser) {
-      Alert.alert('Error', 'User not authenticated.');
-      return;
-    }
-
+  const createGame = () => {
     if (!gameName || !location || !maxPlayers) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
@@ -31,47 +21,12 @@ const CreateGameScreen = () => {
       return;
     }
 
-    try {
-      Alert.alert('Debug', 'Attempting to create game in Firestore'); // Debugging statement
-
-      // Create a new game document
-      const gameDocRef = await addDoc(collection(db, 'games'), {
-        name: gameName,
-        location: location,
-        maxPlayers: parseInt(maxPlayers),
-        currentPlayers: 1, // Since the creator is the first player
-        createdAt: new Date(),
-      });
-
-      const gameId = gameDocRef.id;
-      Alert.alert('Debug', `Game created with ID: ${gameId}`); // Debugging statement
-
-      // Add the user to the game's players subcollection
-      await setDoc(doc(db, 'games', gameId, 'players', auth.currentUser.uid), {
-        uid: auth.currentUser.uid,
-        email: auth.currentUser.email,
-        joinedAt: new Date(),
-      });
-
-      // Update user's currentGameId in their user document
-      await setDoc(
-        doc(db, 'users', auth.currentUser.uid),
-        { currentGameId: gameId },
-        { merge: true }
-      );
-
-      Alert.alert('Success', 'Game created successfully!');
-      // Navigate to the new GameManagementScreen
-      try {
-        navigation.navigate('GameManagementScreen', { gameId });
-      } catch (navError) {
-        console.error('Navigation error:', navError);
-        Alert.alert('Navigation Error', `Failed to navigate: ${navError.message}`);
-      }
-    } catch (error) {
-      console.error('Error creating game:', error);
-      Alert.alert('Error', `Failed to create game: ${error.message}`);
-    }
+    // After validation, navigate to GameManagementScreen
+    navigation.navigate('GameManagementScreen', { 
+      gameName, 
+      location, 
+      maxPlayers: parseInt(maxPlayers) 
+    });
   };
 
   return (
