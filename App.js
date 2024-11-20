@@ -13,6 +13,7 @@ import CreateGameScreen from './CreateGameScreen';
 import JoinGameScreen from './JoinGameScreen';
 import PlayersScreen from './PlayersScreen';
 import TeamsScreen from './TeamsScreen';
+import AboutScreen from './AboutScreen';
 import GameManagementScreen from './GameManagementScreen'; // Import the GameManagementScreen
 
 const Stack = createStackNavigator();
@@ -44,6 +45,11 @@ export default function App() {
               name="AuthenticatedScreen"
               component={AuthenticatedScreen}
               options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="AboutScreen"
+              component={AboutScreen}
+              options={{ title: 'AboutPage' }}
             />
             <Stack.Screen
               name="CreateGameScreen"

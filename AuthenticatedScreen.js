@@ -47,6 +47,10 @@ const AuthenticatedScreen = () => {
     }
   };
 
+  const navigateToAboutPage = () => {
+    navigation.navigate('AboutScreen')
+  }
+
   const navigateToCreateGame = () => {
     navigation.navigate('CreateGameScreen');
   };
@@ -95,6 +99,9 @@ const AuthenticatedScreen = () => {
     return (
       <View style={styles.container}>
         <Text style={styles.welcomeText}>Welcome, {auth.currentUser.email}!</Text>
+        <TouchableOpacity style={styles.button} onPress={navigateToAboutPage}>
+          <Text style={styles.buttonText}>About Our App</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={navigateToCreateGame}>
           <Text style={styles.buttonText}>Create Game</Text>
         </TouchableOpacity>
