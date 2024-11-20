@@ -5,7 +5,7 @@ import { getAuth } from '@firebase/auth';
 import { getFirestore } from '@firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: 'API Key',
+  apiKey: 'AIzaSyCbP3OE5oK3b-cQ2BnNQeyYIGAjhKBwhk0',
   authDomain: 'nerfwarapp.firebaseapp.com',
   projectId: 'nerfwarapp',
   storageBucket: 'nerfwarapp.firebasestorage.app',

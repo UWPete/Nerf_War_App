@@ -6,27 +6,16 @@ import { useNavigation } from '@react-navigation/native';
 
 const CreateGameScreen = () => {
   const [gameName, setGameName] = useState('');
-  const [location, setLocation] = useState('');
-  const [maxPlayers, setMaxPlayers] = useState('');
   const navigation = useNavigation(); // Use navigation from React Navigation
 
   const createGame = () => {
-    if (!gameName || !location || !maxPlayers) {
-      Alert.alert('Error', 'Please fill in all fields.');
-      return;
-    }
-
-    if (isNaN(maxPlayers) || parseInt(maxPlayers) <= 0) {
-      Alert.alert('Error', 'Please enter a valid number of players.');
+    if (!gameName) {
+      Alert.alert('Error', 'Please enter a game name.');
       return;
     }
 
     // After validation, navigate to GameManagementScreen
-    navigation.navigate('GameManagementScreen', { 
-      gameName, 
-      location, 
-      maxPlayers: parseInt(maxPlayers) 
-    });
+    navigation.navigate('GameManagementScreen', { gameName });
   };
 
   return (
@@ -38,19 +27,6 @@ const CreateGameScreen = () => {
         value={gameName}
         onChangeText={setGameName}
         style={styles.input}
-      />
-      <TextInput
-        placeholder="Location"
-        value={location}
-        onChangeText={setLocation}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Max Players"
-        value={maxPlayers}
-        onChangeText={setMaxPlayers}
-        style={styles.input}
-        keyboardType="numeric"
       />
 
       <TouchableOpacity style={styles.createButton} onPress={createGame}>

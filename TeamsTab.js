@@ -1,54 +1,39 @@
 // TeamsTab.js
 
-import React, { useEffect, useState } from 'react';
-import { View, FlatList, Text, StyleSheet, Button, Alert, TextInput } from 'react-native';
-import { db } from './firebaseConfig';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { View, FlatList, TextInput, Button, Text, Alert, StyleSheet, TouchableOpacity } from 'react-native';
 
-const TeamsTab = ({ route }) => {
-  const { gameId } = route.params;
-  const [teams, setTeams] = useState([]);
-  const [teamName, setTeamName] = useState('');
+const TeamsTab = ({ teams, setTeams }) => {
+  const [newTeamName, setNewTeamName] = useState('');
 
-  const fetchTeams = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'games', gameId, 'teams'));
-      const teamsList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setTeams(teamsList);
-    } catch (error) {
-      console.error('Error fetching teams:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchTeams();
-  }, [gameId]);
-
-  // Function to add a team
-  const addTeam = async () => {
-    if (!teamName) {
+  const addTeam = () => {
+    if (!newTeamName) {
       Alert.alert('Error', 'Please enter a team name.');
       return;
     }
 
-    try {
-      await addDoc(collection(db, 'games', gameId, 'teams'), {
-        name: teamName,
-        createdAt: new Date(),
-      });
-      Alert.alert('Success', 'Team added successfully!');
-      setTeamName('');
-      // Refresh the teams list
-      fetchTeams();
-    } catch (error) {
-      console.error('Error adding team:', error);
-      Alert.alert('Error', 'Failed to add team.');
-    }
+    setTeams([...teams, { name: newTeamName, players: [], status: 'in' }]);
+    setNewTeamName('');
   };
 
-  const renderItem = ({ item }) => (
+  const toggleTeamStatus = (index) => {
+    const updatedTeams = [...teams];
+    updatedTeams[index].status = updatedTeams[index].status === 'in' ? 'out' : 'in';
+    setTeams(updatedTeams);
+  };
+
+  const renderItem = ({ item, index }) => (
     <View style={styles.itemContainer}>
-      <Text>{item.name}</Text>
+      <Text style={styles.teamName}>{item.name}</Text>
+      <Text>Status: {item.status === 'in' ? 'Active' : 'Eliminated'}</Text>
+      <TouchableOpacity
+        style={styles.toggleButton}
+        onPress={() => toggleTeamStatus(index)}
+      >
+        <Text style={styles.toggleText}>
+          {item.status === 'in' ? 'Eliminate' : 'Reinstate'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -56,14 +41,14 @@ const TeamsTab = ({ route }) => {
     <View style={styles.container}>
       <TextInput
         placeholder="Team Name"
-        value={teamName}
-        onChangeText={setTeamName}
+        value={newTeamName}
+        onChangeText={setNewTeamName}
         style={styles.input}
       />
       <Button title="Add Team" onPress={addTeam} />
       <FlatList
         data={teams}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => index.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.listContainer}
       />
@@ -89,8 +74,24 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   itemContainer: {
+    marginBottom: 12,
     padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+  },
+  teamName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  toggleButton: {
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: '#e74c3c',
+    borderRadius: 4,
+  },
+  toggleText: {
+    color: '#fff',
+    textAlign: 'center',
   },
 });
