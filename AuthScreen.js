@@ -1,14 +1,16 @@
 // AuthScreen.js
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { auth, db } from './firebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import { Ionicons } from '@expo/vector-icons'; // Install with `expo install @expo/vector-icons`
 
 const AuthScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false); // Password visibility toggle state
   const [isLogin, setIsLogin] = useState(true);
 
   const handleAuthentication = async () => {
@@ -50,13 +52,22 @@ const AuthScreen = () => {
           placeholder="Email"
           autoCapitalize="none"
         />
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          secureTextEntry
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Password"
+            secureTextEntry={!isPasswordVisible}
+          />
+          <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+            <Ionicons
+              name={isPasswordVisible ? 'eye-off' : 'eye'}
+              size={24}
+              color="gray"
+            />
+          </TouchableOpacity>
+        </View>
         <View style={styles.buttonContainer}>
           <Button
             title={isLogin ? 'Sign In' : 'Sign Up'}
@@ -105,6 +116,19 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     padding: 8,
     borderRadius: 4,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderColor: '#ddd',
+    borderWidth: 1,
+    marginBottom: 16,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+  },
+  passwordInput: {
+    flex: 1,
+    height: 40,
   },
   buttonContainer: {
     marginBottom: 16,
