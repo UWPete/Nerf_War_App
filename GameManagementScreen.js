@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import TeamsTab from './TeamsTab';
 import PlayersTab from './PlayersTab';
 import HubScreen from './HubScreen';
@@ -36,6 +36,10 @@ const GameManagementScreen = ({ route }) => {
   const playersInGame = totalPlayers - playersOut;
   const teamsInGame = totalTeams - teamsOut;
 
+  const navigateToAuthenticatedScreen = () => {
+    navigation.navigate('AuthenticatedScreen')
+  }
+
   return (
     <View style={styles.container}>
       {/* Game Dashboard */}
@@ -47,6 +51,9 @@ const GameManagementScreen = ({ route }) => {
         <Text style={styles.info}>
           Players in Game: {playersInGame} | Players Out: {playersOut}
         </Text>
+        <TouchableOpacity style={styles.button} onPress={navigateToAuthenticatedScreen}>
+          <Text style={styles.buttonText}>Back to Main Dashboard</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Bottom Tab Navigator */}
@@ -85,6 +92,22 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#3498db',
     alignItems: 'center',
+  },
+  button: {
+    backgroundColor: '#3498db',
+    paddingVertical: 15,
+    marginHorizontal: 40,
+    marginVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    borderColor: '#fff',
+    borderWidth: 3,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    textAlign: 'center',
   },
   title: {
     fontSize: 24,
