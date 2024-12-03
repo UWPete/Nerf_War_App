@@ -6,7 +6,6 @@ import {
   Text, 
   TextInput, 
   StyleSheet, 
-  ScrollView, 
   Alert, 
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -27,17 +26,21 @@ const AuthScreen = () => {
   const handleAuthentication = async () => {
     try {
       if (isLogin) {
+        // Sign in
         await signInWithEmailAndPassword(auth, email, password);
         console.log('User signed in successfully!');
         Alert.alert('Success', 'Signed in successfully!');
       } else {
+        // Sign up
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         console.log('User created successfully!');
 
+        // Create user document in Firestore
         await setDoc(doc(db, 'users', userCredential.user.uid), {
           uid: userCredential.user.uid,
           email: email,
           createdAt: new Date(),
+          currentGameId: null
         });
 
         Alert.alert('Success', 'Account created successfully!');
@@ -53,92 +56,90 @@ const AuthScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.authContainer}>
-          <Image 
-            source={require('./assets/favicon.png')} 
-            style={styles.logo}
+      <View style={styles.authContainer}>
+        <Image 
+          source={require('./assets/favicon.png')} 
+          style={styles.logo}
+        />
+        
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter email"
+            placeholderTextColor="#666"
+            autoCapitalize="none"
+            keyboardType="email-address"
           />
-          
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Your email"
-              placeholderTextColor="#666"
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Your password"
-                placeholderTextColor="#666"
-                secureTextEntry={!isPasswordVisible}
-              />
-              <TouchableOpacity 
-                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-                style={styles.eyeIcon}
-              >
-                <Ionicons
-                  name={isPasswordVisible ? 'eye-off' : 'eye'}
-                  size={24}
-                  color="#666"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <TouchableOpacity>
-            <Text style={styles.forgotPassword}>Forgot Password?</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.loginButton} 
-            onPress={handleAuthentication}
-          >
-            <Text style={styles.loginButtonText}>
-              {isLogin ? 'Login' : 'Sign Up'}
-            </Text>
-          </TouchableOpacity>
-
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.divider} />
-          </View>
-
-          <TouchableOpacity style={styles.socialButton}>
-            <Ionicons name="logo-apple" size={20} color="#fff" />
-            <Text style={styles.socialButtonText}>Continue with Apple</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.socialButton, styles.googleButton]}>
-            <Ionicons name="logo-google" size={20} color="#000" />
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.toggleContainer}
-            onPress={() => setIsLogin(!isLogin)}
-          >
-            <Text style={styles.toggleText}>
-              {isLogin ? "Don't have an account? " : 'Already have an account? '}
-              <Text style={styles.toggleTextBold}>
-                {isLogin ? 'Sign Up' : 'Log In'}
-              </Text>
-            </Text>
-          </TouchableOpacity>
         </View>
-      </ScrollView>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Enter password"
+              placeholderTextColor="#666"
+              secureTextEntry={!isPasswordVisible}
+            />
+            <TouchableOpacity 
+              style={styles.eyeIcon}
+              onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+            >
+              <Ionicons
+                name={isPasswordVisible ? 'eye-off' : 'eye'}
+                size={24}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <TouchableOpacity>
+          <Text style={styles.forgotPassword}>Forgot Password?</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.loginButton} 
+          onPress={handleAuthentication}
+        >
+          <Text style={styles.loginButtonText}>
+            {isLogin ? 'Login' : 'Sign Up'}
+          </Text>
+        </TouchableOpacity>
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.divider} />
+        </View>
+
+        <TouchableOpacity style={styles.socialButton}>
+          <Ionicons name="logo-apple" size={20} color="#fff" />
+          <Text style={styles.socialButtonText}>Continue with Apple</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.socialButton, styles.googleButton]}>
+          <Ionicons name="logo-google" size={20} color="#000" />
+          <Text style={styles.googleButtonText}>Continue with Google</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.toggleContainer}
+          onPress={() => setIsLogin(!isLogin)}
+        >
+          <Text style={styles.toggleText}>
+            {isLogin ? "Don't have an account? " : 'Already have an account? '}
+            <Text style={styles.toggleTextBold}>
+              {isLogin ? 'Sign Up' : 'Log In'}
+            </Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -148,12 +149,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
   authContainer: {
+    flex: 1,
     padding: 20,
+    justifyContent: 'center',
   },
   logo: {
     width: 350,
@@ -171,24 +170,28 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    height: 50,
     backgroundColor: '#161616',
+    height: 50,
     borderRadius: 8,
     paddingHorizontal: 16,
     color: '#fff',
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#333',
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#161616',
     borderRadius: 8,
-    height: 50,
+    borderWidth: 1,
+    borderColor: '#333',
   },
   passwordInput: {
     flex: 1,
-    color: '#fff',
+    height: 50,
     paddingHorizontal: 16,
+    color: '#fff',
     fontSize: 16,
   },
   eyeIcon: {

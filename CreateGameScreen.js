@@ -11,23 +11,22 @@ import {
   Modal, 
   ScrollView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { collection, addDoc } from 'firebase/firestore';
+import { auth, db } from './firebaseConfig';
 
 const CreateGameScreen = () => {
   const [gameName, setGameName] = useState('');
+  const [location, setLocation] = useState('');
+  const [maxPlayers, setMaxPlayers] = useState('12');
+  const [gamePassword, setGamePassword] = useState('');
   const [rulesVisible, setRulesVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
-
-  const createGame = () => {
-    if (!gameName) {
-      Alert.alert('Error', 'Please enter a game name.');
-      return;
-    }
-    navigation.navigate('GameManagementScreen', { gameName });
-  };
 
   const rulesList = [
     'Players must use approved Nerf guns only',
@@ -41,6 +40,72 @@ const CreateGameScreen = () => {
     'Be respectful of non-players and private property',
     'Have fun and play fairly!'
   ];
+
+  const createGame = async () => {
+    if (!gameName.trim()) {
+      Alert.alert('Error', 'Please enter a game name.');
+      return;
+    }
+
+    if (!location.trim()) {
+      Alert.alert('Error', 'Please enter a location.');
+      return;
+    }
+
+    if (!gamePassword || gamePassword.length < 6 || gamePassword.length > 20) {
+      Alert.alert('Error', 'Password must be between 6 and 20 characters.');
+      return;
+    }
+
+    if (!maxPlayers || isNaN(maxPlayers) || Number(maxPlayers) < 2) {
+      Alert.alert('Error', 'Please enter a valid number of players (minimum 2)');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const gameData = {
+        name: gameName.trim(),
+        location: location.trim(),
+        password: gamePassword,
+        maxPlayers: parseInt(maxPlayers),
+        currentPlayers: 1,
+        hostId: auth.currentUser.uid,
+        hostEmail: auth.currentUser.email,
+        createdAt: new Date(),
+        status: 'waiting',
+        rules: rulesList
+      };
+
+      const gameRef = await addDoc(collection(db, 'games'), gameData);
+
+      // Add host as first player
+      await addDoc(collection(db, 'games', gameRef.id, 'players'), {
+        uid: auth.currentUser.uid,
+        email: auth.currentUser.email,
+        role: 'host',
+        status: 'active',
+        joinedAt: new Date()
+      });
+
+      navigation.navigate('GameManagementScreen', { gameId: gameRef.id });
+    } catch (error) {
+      console.error('Error creating game:', error);
+      Alert.alert('Error', 'Failed to create game. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4CAF50" />
+        <Text style={styles.loadingText}>Creating game...</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -65,6 +130,42 @@ const CreateGameScreen = () => {
             />
           </View>
 
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Location</Text>
+            <TextInput
+              placeholder="e.g., Downtown Area"
+              placeholderTextColor="#666"
+              value={location}
+              onChangeText={setLocation}
+              style={styles.input}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Game Password</Text>
+            <TextInput
+              placeholder="Enter game password (6-20 characters)"
+              placeholderTextColor="#666"
+              value={gamePassword}
+              onChangeText={setGamePassword}
+              secureTextEntry
+              style={styles.input}
+              maxLength={20}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Maximum Players</Text>
+            <TextInput
+              placeholder="Enter number of players"
+              placeholderTextColor="#666"
+              value={maxPlayers}
+              onChangeText={setMaxPlayers}
+              keyboardType="number-pad"
+              style={styles.input}
+            />
+          </View>
+
           <TouchableOpacity 
             style={styles.rulesButton} 
             onPress={() => setRulesVisible(true)}
@@ -74,7 +175,14 @@ const CreateGameScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.createButton} onPress={createGame}>
+        <TouchableOpacity 
+          style={[
+            styles.createButton,
+            (!gameName.trim() || !location.trim() || !gamePassword) && styles.createButtonDisabled
+          ]} 
+          onPress={createGame}
+          disabled={!gameName.trim() || !location.trim() || !gamePassword}
+        >
           <Text style={styles.createButtonText}>Create Game</Text>
         </TouchableOpacity>
 
@@ -126,6 +234,17 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     padding: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+  },
+  loadingText: {
+    color: '#fff',
+    marginTop: 16,
+    fontSize: 16,
   },
   header: {
     marginTop: 40,
@@ -189,6 +308,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
+  },
+  createButtonDisabled: {
+    opacity: 0.5,
   },
   createButtonText: {
     color: '#000',
