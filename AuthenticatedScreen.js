@@ -1,7 +1,15 @@
 // AuthenticatedScreen.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  Alert, 
+  ActivityIndicator,
+  Image
+} from 'react-native';
 import { auth, db } from './firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -113,6 +121,12 @@ const AuthenticatedScreen = () => {
             <Text style={styles.secondaryButtonText}>About Our App</Text>
           </TouchableOpacity>
         </View>
+
+        <Image 
+          source={require('./assets/seniorAssassinLogoTransparent.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={24} color="#666" />
@@ -233,6 +247,14 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 18,
     fontWeight: '600',
+  },
+  logo: {
+    width: '80%',
+    height: 200,
+    alignSelf: 'center',
+    marginTop: 140,
+    marginBottom: 'auto',
+    opacity: 0.1,
   },
   gameHeader: {
     marginTop: 40,
