@@ -1,15 +1,17 @@
 // AuthenticatedScreen.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { auth, db } from './firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 const AuthenticatedScreen = () => {
   const navigation = useNavigation();
   const [currentGame, setCurrentGame] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserGame = async () => {
@@ -20,7 +22,6 @@ const AuthenticatedScreen = () => {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           if (userData.currentGameId) {
-            // User is part of a game, fetch game data
             const gameDocRef = doc(db, 'games', userData.currentGameId);
             const gameDoc = await getDoc(gameDocRef);
             if (gameDoc.exists()) {
@@ -30,6 +31,8 @@ const AuthenticatedScreen = () => {
         }
       } catch (error) {
         console.error('Error fetching user game:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -40,40 +43,24 @@ const AuthenticatedScreen = () => {
     try {
       await signOut(auth);
       console.log('User logged out successfully!');
-      // Navigation is handled by App.js
     } catch (error) {
       console.error('Logout error:', error.message);
       Alert.alert('Error', error.message);
     }
   };
 
-  const navigateToAboutPage = () => {
-    navigation.navigate('AboutScreen')
-  }
-
-  const navigateToCreateGame = () => {
-    navigation.navigate('CreateGameScreen');
-  };
-
-  const navigateToJoinGame = () => {
-    navigation.navigate('JoinGameScreen');
-  };
-
-  const navigateToPlayers = () => {
-    navigation.navigate('PlayersScreen', { gameId: currentGame.id });
-  };
-
-  const navigateToTeams = () => {
-    navigation.navigate('TeamsScreen', { gameId: currentGame.id });
-  };
+  const navigateToAboutPage = () => navigation.navigate('AboutScreen');
+  const navigateToCreateGame = () => navigation.navigate('CreateGameScreen');
+  const navigateToJoinGame = () => navigation.navigate('JoinGameScreen');
+  const navigateToPlayers = () => navigation.navigate('PlayersScreen', { gameId: currentGame.id });
+  const navigateToTeams = () => navigation.navigate('TeamsScreen', { gameId: currentGame.id });
 
   const leaveGame = async () => {
     try {
-      // Remove user from the game's players collection
+      setLoading(true);
       const playerDocRef = doc(db, 'games', currentGame.id, 'players', auth.currentUser.uid);
       await deleteDoc(playerDocRef);
 
-      // Update game's currentPlayers count
       const gameDocRef = doc(db, 'games', currentGame.id);
       const gameDoc = await getDoc(gameDocRef);
       if (gameDoc.exists()) {
@@ -81,148 +68,268 @@ const AuthenticatedScreen = () => {
         await updateDoc(gameDocRef, { currentPlayers: gameData.currentPlayers - 1 });
       }
 
-      // Update user's currentGameId to null
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
       await updateDoc(userDocRef, { currentGameId: null });
 
       setCurrentGame(null);
-
-      Alert.alert('Left Game', 'You have left the game.');
+      Alert.alert('Success', 'Left game successfully');
     } catch (error) {
       console.error('Error leaving game:', error);
       Alert.alert('Error', 'Failed to leave game.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
+
   if (!currentGame) {
-    // User is not in a game, show options to create or join a game
     return (
       <View style={styles.container}>
-        <Text style={styles.welcomeText}>Welcome, {auth.currentUser.email}!</Text>
-        <TouchableOpacity style={styles.button} onPress={navigateToAboutPage}>
-          <Text style={styles.buttonText}>About Our App</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={navigateToCreateGame}>
-          <Text style={styles.buttonText}>Create Game</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={navigateToJoinGame}>
-          <Text style={styles.buttonText}>Join Game</Text>
-        </TouchableOpacity>
+        <View style={styles.header}>
+          <Text style={styles.welcomeText}>Welcome back,</Text>
+          <Text style={styles.emailText}>{auth.currentUser.email}</Text>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.mainButton} onPress={navigateToCreateGame}>
+            <Ionicons name="add-circle-outline" size={24} color="#fff" />
+            <Text style={styles.mainButtonText}>Create Game</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.mainButton} onPress={navigateToJoinGame}>
+            <Ionicons name="enter-outline" size={24} color="#fff" />
+            <Text style={styles.mainButtonText}>Join Game</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.secondaryButton} onPress={navigateToAboutPage}>
+            <Ionicons name="information-circle-outline" size={24} color="#666" />
+            <Text style={styles.secondaryButtonText}>About Our App</Text>
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color="#666" />
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  // User is in a game, show game info and options
   return (
     <View style={styles.container}>
-      <Text style={styles.gameName}>{currentGame.name}</Text>
-
-      <View style={styles.gameInfo}>
-        <Text style={styles.gameDetail}>Location: {currentGame.location}</Text>
-        <Text style={styles.gameDetail}>
-          Players: {currentGame.currentPlayers}/{currentGame.maxPlayers}
-        </Text>
+      <View style={styles.gameHeader}>
+        <Text style={styles.gameName}>{currentGame.name}</Text>
+        <View style={styles.gameStatus}>
+          <View style={styles.statusIndicator} />
+          <Text style={styles.statusText}>Live Game</Text>
+        </View>
       </View>
 
-      <View style={styles.iconRow}>
-        <TouchableOpacity style={styles.iconButton} onPress={navigateToPlayers}>
-          <Text style={styles.iconLabel}>Players</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton} onPress={navigateToTeams}>
-          <Text style={styles.iconLabel}>Teams</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton} onPress={leaveGame}>
-          <Text style={styles.iconLabel}>Leave</Text>
-        </TouchableOpacity>
+      <View style={styles.gameCard}>
+        <Text style={styles.cardTitle}>Game Details</Text>
+        <View style={styles.gameInfo}>
+          <View style={styles.infoRow}>
+            <Ionicons name="location-outline" size={20} color="#666" />
+            <Text style={styles.gameDetail}>{currentGame.location}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="people-outline" size={20} color="#666" />
+            <Text style={styles.gameDetail}>
+              {currentGame.currentPlayers}/{currentGame.maxPlayers} Players
+            </Text>
+          </View>
+        </View>
       </View>
 
-      {/* Additional game-related info can be added here */}
+      <View style={styles.actionButtons}>
+        <TouchableOpacity style={styles.actionButton} onPress={navigateToPlayers}>
+          <Ionicons name="people" size={24} color="#fff" />
+          <Text style={styles.actionButtonText}>Players</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.actionButton} onPress={navigateToTeams}>
+          <Ionicons name="people-circle" size={24} color="#fff" />
+          <Text style={styles.actionButtonText}>Teams</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.actionButton, styles.leaveButton]} 
+          onPress={leaveGame}
+        >
+          <Ionicons name="exit" size={24} color="#ff4444" />
+          <Text style={styles.leaveButtonText}>Leave</Text>
+        </TouchableOpacity>
+      </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Ionicons name="log-out-outline" size={24} color="#666" />
         <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-export default AuthenticatedScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#000',
+    padding: 20,
   },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#3498db',
-    textAlign: 'center',
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
     marginTop: 40,
     marginBottom: 40,
   },
-  button: {
-    backgroundColor: '#3498db',
-    paddingVertical: 15,
-    marginHorizontal: 40,
-    marginVertical: 10,
-    borderRadius: 8,
+  welcomeText: {
+    fontSize: 24,
+    color: '#666',
+    marginBottom: 8,
   },
-  buttonText: {
+  emailText: {
+    fontSize: 20,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  buttonContainer: {
+    gap: 16,
+  },
+  mainButton: {
+    backgroundColor: '#161616',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  mainButtonText: {
     color: '#fff',
     fontSize: 18,
-    textAlign: 'center',
+    fontWeight: '600',
   },
-  logoutButton: {
-    backgroundColor: '#e74c3c',
-    paddingVertical: 15,
-    marginHorizontal: 40,
-    marginVertical: 30,
-    borderRadius: 8,
+  secondaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: '#333',
   },
-  logoutButtonText: {
-    color: '#fff',
+  secondaryButtonText: {
+    color: '#666',
     fontSize: 18,
-    textAlign: 'center',
+    fontWeight: '600',
   },
-  topImage: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
+  gameHeader: {
+    marginTop: 40,
+    marginBottom: 30,
   },
   gameName: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#2c3e50',
-    textAlign: 'center',
-    marginVertical: 20,
+    color: '#fff',
+    marginBottom: 8,
   },
-  gameInfo: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  gameDetail: {
-    fontSize: 18,
-    color: '#34495e',
-    marginVertical: 5,
-  },
-  iconRow: {
+  gameStatus: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginHorizontal: 20,
-    marginVertical: 20,
-  },
-  iconButton: {
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#ecf0f1',
-    borderRadius: 8,
+    gap: 8,
   },
-  iconLabel: {
-    color: '#3498db',
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4CAF50',
+  },
+  statusText: {
+    color: '#4CAF50',
     fontSize: 16,
   },
+  gameCard: {
+    backgroundColor: '#161616',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  cardTitle: {
+    color: '#666',
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  gameInfo: {
+    gap: 12,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  gameDetail: {
+    color: '#fff',
+    fontSize: 18,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 24,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: '#161616',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  actionButtonText: {
+    color: '#fff',
+    marginTop: 8,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  leaveButton: {
+    backgroundColor: '#1a0000',
+  },
+  leaveButtonText: {
+    color: '#ff4444',
+    marginTop: 8,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 'auto',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  logoutButtonText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
+
+export default AuthenticatedScreen;

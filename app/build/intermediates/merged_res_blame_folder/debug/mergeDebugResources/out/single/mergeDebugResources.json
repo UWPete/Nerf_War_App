@@ -1,0 +1,106 @@
+[
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/layout_dialog_edit_player.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/layout/dialog_edit_player.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/layout_activity_home_page.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/layout/activity_home_page.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/layout_activity_game_hud.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/layout/activity_game_hud.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/layout_item_player.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/layout/item_player.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/layout_activity_create_user_page.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/layout/activity_create_user_page.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-anydpi_ic_launcher.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-anydpi/ic_launcher.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/layout_activity_main.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/layout_activity_game_creation.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/layout/activity_game_creation.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/layout_activity_game_details.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/layout/activity_game_details.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/xml_backup_rules.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/layout_item_team.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/layout/item_team.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/menu_home_page_menu.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/menu/home_page_menu.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-anydpi_ic_launcher_round.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-anydpi/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/xml_data_extraction_rules.xml.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.cs407.nerf_war_app-debug-43:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "com.cs407.nerf_war_app-main-45:/mipmap-hdpi/ic_launcher_round.webp"
+    }
+]

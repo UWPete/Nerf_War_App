@@ -3,6 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Nerf_War_App.iml" filepath="$PROJECT_DIR$/.idea/Nerf_War_App.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Nerf_War_App.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Nerf_War_App.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Nerf_War_App.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Nerf_War_App.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Nerf_War_App.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Nerf_War_App.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Nerf_War_App.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Nerf_War_App.app.unitTest.iml" />
     </modules>
   </component>
 </project>

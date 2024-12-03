@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/player_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="18sp"
+        android:paddingEnd="16dp"/>
+
+    <TextView
+        android:id="@+id/player_team"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Team"
+        android:paddingEnd="16dp"
+        android:textSize="14sp" />
+
+    <Switch
+        android:id="@+id/player_status_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="In Game"
+        android:paddingEnd="8dp" />
+
+    <Button
+        android:id="@+id/edit_player_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit"/>
+</LinearLayout>
