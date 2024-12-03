@@ -156,11 +156,11 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: 300,
-    height: 300,
+    width: 350,
+    height: 400,
     resizeMode: 'contain',
     alignSelf: 'center',
-    marginBottom: 30,
+    marginBottom: -100,
   },
   inputGroup: {
     marginBottom: 20,
