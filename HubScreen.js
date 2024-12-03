@@ -10,25 +10,53 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Keyboard
+  Keyboard,
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { auth } from './firebaseConfig';
+import * as Location from 'expo-location';
 
-const HubScreen = () => {
+const HubScreen = ({ route }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const flatListRef = useRef(null);
+  const [location, setLocation] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(true);
+
+  const { gameLocation } = route.params;
+
+  useEffect(() => {
+    // Use the location passed from GameManagementScreen
+    if (gameLocation) {
+      setLocation(gameLocation);
+      setLocationLoading(false);
+    } else {
+      // If no location is passed, request location permission and get current location
+      (async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'Permission to access location was denied.');
+          setLocationLoading(false);
+          return;
+        }
+
+        let currentLocation = await Location.getCurrentPositionAsync({});
+        setLocation(currentLocation.coords);
+        setLocationLoading(false);
+      })();
+    }
+  }, []);
 
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      e => setKeyboardHeight(e.endCoordinates.height)
+      e => {}
     );
     const keyboardWillHide = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => setKeyboardHeight(0)
+      () => {}
     );
 
     return () => {
@@ -92,6 +120,19 @@ const HubScreen = () => {
         <Text style={styles.title}>Game Hub</Text>
         <Text style={styles.subtitle}>Communication Channel</Text>
       </View>
+
+      {locationLoading ? (
+        <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 20 }} />
+      ) : (
+        location && (
+          <View style={styles.locationContainer}>
+            <Ionicons name="location-outline" size={24} color="#4CAF50" />
+            <Text style={styles.locationText}>
+              Game Location: Latitude {location.latitude.toFixed(6)}, Longitude {location.longitude.toFixed(6)}
+            </Text>
+          </View>
+        )
+      )}
 
       {messages.length === 0 ? (
         <View style={styles.emptyState}>
@@ -163,8 +204,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#161616',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  locationText: {
+    color: '#fff',
+    fontSize: 14,
+    marginLeft: 8,
+  },
   messageList: {
     padding: 16,
+    flexGrow: 1,
   },
   messageBubbleContainer: {
     marginBottom: 16,

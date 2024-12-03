@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import TeamsTab from './TeamsTab';
 import PlayersTab from './PlayersTab';
 import HubScreen from './HubScreen';
 import { useNavigation } from '@react-navigation/native';
+import * as Location from 'expo-location';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,6 +19,7 @@ const GameManagementScreen = ({ route }) => {
   const [teams, setTeams] = useState([]);
   const [playersOut, setPlayersOut] = useState(0);
   const [teamsOut, setTeamsOut] = useState(0);
+  const [gameLocation, setGameLocation] = useState(null);
 
   useEffect(() => {
     const totalTeamsOut = teams.filter((team) => team.status === 'out').length;
@@ -29,6 +31,20 @@ const GameManagementScreen = ({ route }) => {
     setTeamsOut(totalTeamsOut);
     setPlayersOut(totalPlayersOut);
   }, [teams]);
+
+  useEffect(() => {
+    // Get location when the game is created
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Permission to access location was denied.');
+        return;
+      }
+
+      let currentLocation = await Location.getCurrentPositionAsync({});
+      setGameLocation(currentLocation.coords);
+    })();
+  }, []);
 
   const totalPlayers = teams.reduce((sum, team) => sum + team.players.length, 0);
   const totalTeams = teams.length;
@@ -120,7 +136,7 @@ const GameManagementScreen = ({ route }) => {
         />
         <Tab.Screen
           name="Hub"
-          component={HubScreen}
+          children={() => <HubScreen route={{ params: { gameLocation } }} />}
           options={{ title: 'Game Hub' }}
         />
       </Tab.Navigator>
