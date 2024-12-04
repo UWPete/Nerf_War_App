@@ -1,16 +1,16 @@
 // PlayersTab.js
 
 import React, { useState } from 'react';
-import { 
-  View, 
-  FlatList, 
-  TextInput, 
-  Text, 
-  Alert, 
-  StyleSheet, 
+import {
+  View,
+  FlatList,
+  TextInput,
+  Text,
+  Alert,
+  StyleSheet,
   TouchableOpacity,
   Modal,
-  ScrollView
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -18,6 +18,8 @@ const PlayersTab = ({ teams, setTeams }) => {
   const [playerName, setPlayerName] = useState('');
   const [selectedTeam, setSelectedTeam] = useState('');
   const [isTeamSelectorVisible, setIsTeamSelectorVisible] = useState(false);
+  const [isEliminatorModalVisible, setIsEliminatorModalVisible] = useState(false);
+  const [selectedEliminatedPlayer, setSelectedEliminatedPlayer] = useState(null);
 
   const addPlayer = () => {
     if (!playerName || !selectedTeam) {
@@ -29,7 +31,10 @@ const PlayersTab = ({ teams, setTeams }) => {
       if (team.name === selectedTeam) {
         return {
           ...team,
-          players: [...team.players, { name: playerName, status: 'active' }],
+          players: [
+            ...team.players,
+            { name: playerName, status: 'active', kills: 0 },
+          ],
         };
       }
       return team;
@@ -41,25 +46,39 @@ const PlayersTab = ({ teams, setTeams }) => {
   };
 
   const togglePlayerStatus = (teamIndex, playerIndex) => {
-    Alert.alert(
-      'Confirm Status Change',
-      'Are you sure you want to change this player\'s status?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        },
-        {
-          text: 'Confirm',
-          onPress: () => {
-            const updatedTeams = [...teams];
-            const player = updatedTeams[teamIndex].players[playerIndex];
-            player.status = player.status === 'active' ? 'eliminated' : 'active';
-            setTeams(updatedTeams);
-          }
+    const player = teams[teamIndex].players[playerIndex];
+
+    if (player.status === 'eliminated') {
+      // Revive the player
+      const updatedTeams = [...teams];
+      updatedTeams[teamIndex].players[playerIndex].status = 'active';
+      setTeams(updatedTeams);
+    } else {
+      // Eliminate the player and select the eliminator
+      setSelectedEliminatedPlayer({ teamIndex, playerIndex });
+      setIsEliminatorModalVisible(true);
+    }
+  };
+
+  const handleEliminatorSelect = (eliminator) => {
+    const { teamIndex, playerIndex } = selectedEliminatedPlayer;
+    const updatedTeams = [...teams];
+
+    // Update eliminated player's status
+    updatedTeams[teamIndex].players[playerIndex].status = 'eliminated';
+
+    // Increment eliminator's kills
+    updatedTeams.forEach((team) => {
+      team.players.forEach((player) => {
+        if (player.name === eliminator.name) {
+          player.kills = (player.kills || 0) + 1;
         }
-      ]
-    );
+      });
+    });
+
+    setTeams(updatedTeams);
+    setIsEliminatorModalVisible(false);
+    setSelectedEliminatedPlayer(null);
   };
 
   const PlayerCard = ({ player, teamIndex, playerIndex }) => (
@@ -72,26 +91,28 @@ const PlayersTab = ({ teams, setTeams }) => {
         </View>
         <View style={styles.playerDetails}>
           <Text style={styles.playerName}>{player.name}</Text>
-          <Text style={[
-            styles.statusText,
-            { color: player.status === 'active' ? '#4CAF50' : '#ff4444' }
-          ]}>
+          <Text
+            style={[
+              styles.statusText,
+              { color: player.status === 'active' ? '#4CAF50' : '#ff4444' },
+            ]}
+          >
             {player.status === 'active' ? 'Active' : 'Eliminated'}
           </Text>
         </View>
       </View>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
           styles.actionButton,
-          { backgroundColor: player.status === 'active' ? '#331a1a' : '#1a3320' }
+          { backgroundColor: player.status === 'active' ? '#331a1a' : '#1a3320' },
         ]}
         onPress={() => togglePlayerStatus(teamIndex, playerIndex)}
       >
-        <Ionicons 
-          name={player.status === 'active' ? 'close-circle' : 'checkmark-circle'} 
-          size={24} 
-          color={player.status === 'active' ? '#ff4444' : '#4CAF50'} 
+        <Ionicons
+          name={player.status === 'active' ? 'close-circle' : 'refresh-circle'}
+          size={24}
+          color={player.status === 'active' ? '#ff4444' : '#4CAF50'}
         />
       </TouchableOpacity>
     </View>
@@ -101,7 +122,7 @@ const PlayersTab = ({ teams, setTeams }) => {
     <View style={styles.teamSection}>
       <Text style={styles.teamName}>{team.name}</Text>
       {team.players.map((player, playerIndex) => (
-        <PlayerCard 
+        <PlayerCard
           key={`${teamIndex}-${playerIndex}`}
           player={player}
           teamIndex={teamIndex}
@@ -122,14 +143,14 @@ const PlayersTab = ({ teams, setTeams }) => {
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Select Team</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setIsTeamSelectorVisible(false)}
               style={styles.closeButton}
             >
               <Ionicons name="close" size={24} color="#666" />
             </TouchableOpacity>
           </View>
-          
+
           <ScrollView style={styles.teamList}>
             {teams.map((team) => (
               <TouchableOpacity
@@ -152,6 +173,41 @@ const PlayersTab = ({ teams, setTeams }) => {
     </Modal>
   );
 
+  const EliminatorSelectorModal = () => (
+    <Modal
+      visible={isEliminatorModalVisible}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setIsEliminatorModalVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Select Eliminator</Text>
+          <FlatList
+            data={teams.flatMap((team) =>
+              team.players.filter((p) => p.status === 'active')
+            )}
+            keyExtractor={(item) => item.name}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.playerOption}
+                onPress={() => handleEliminatorSelect(item)}
+              >
+                <Text style={styles.playerOptionText}>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+          <TouchableOpacity
+            onPress={() => setIsEliminatorModalVisible(false)}
+            style={styles.closeButton}
+          >
+            <Text style={styles.closeButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -167,21 +223,26 @@ const PlayersTab = ({ teams, setTeams }) => {
           style={styles.input}
         />
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.teamSelector}
           onPress={() => setIsTeamSelectorVisible(true)}
         >
-          <Text style={[
-            styles.teamSelectorText,
-            !selectedTeam && { color: '#666' }
-          ]}>
+          <Text
+            style={[
+              styles.teamSelectorText,
+              !selectedTeam && { color: '#666' },
+            ]}
+          >
             {selectedTeam || 'Select Team'}
           </Text>
           <Ionicons name="chevron-down" size={24} color="#666" />
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.addButton, !playerName || !selectedTeam ? styles.addButtonDisabled : null]}
+        <TouchableOpacity
+          style={[
+            styles.addButton,
+            !playerName || !selectedTeam ? styles.addButtonDisabled : null,
+          ]}
           onPress={addPlayer}
           disabled={!playerName || !selectedTeam}
         >
@@ -201,6 +262,7 @@ const PlayersTab = ({ teams, setTeams }) => {
       />
 
       <TeamSelectorModal />
+      <EliminatorSelectorModal />
     </View>
   );
 };
@@ -336,14 +398,13 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
   },
   modalContent: {
     backgroundColor: '#161616',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    padding: 16,
-    maxHeight: '70%',
+    margin: 20,
+    padding: 20,
+    borderRadius: 12,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -374,6 +435,21 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 8,
+    alignItems: 'center',
+  },
+  playerOption: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  playerOptionText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  closeButtonText: {
+    color: '#4CAF50',
+    fontSize: 16,
+    marginTop: 16,
   },
 });
 

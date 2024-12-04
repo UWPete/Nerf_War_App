@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import TeamsTab from './TeamsTab';
 import PlayersTab from './PlayersTab';
 import HubScreen from './HubScreen';
+import StatsTab from './StatsTab'; // Import the new StatsTab
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
 
@@ -22,9 +23,9 @@ const GameManagementScreen = ({ route }) => {
   const [gameLocation, setGameLocation] = useState(null);
 
   useEffect(() => {
-    const totalTeamsOut = teams.filter((team) => team.status === 'out').length;
+    const totalTeamsOut = teams.filter((team) => team.status === 'eliminated').length;
     const totalPlayersOut = teams.reduce(
-      (sum, team) => sum + team.players.filter((player) => player.status === 'out').length,
+      (sum, team) => sum + team.players.filter((player) => player.status === 'eliminated').length,
       0
     );
 
@@ -63,8 +64,8 @@ const GameManagementScreen = ({ route }) => {
     <View style={styles.dashboard}>
       <View style={styles.headerTop}>
         <Text style={styles.title}>{gameName}</Text>
-        <TouchableOpacity 
-          style={styles.backButton} 
+        <TouchableOpacity
+          style={styles.backButton}
           onPress={() => navigation.navigate('AuthenticatedScreen')}
         >
           <Ionicons name="arrow-back" size={24} color="#666" />
@@ -72,15 +73,15 @@ const GameManagementScreen = ({ route }) => {
       </View>
 
       <View style={styles.statsContainer}>
-        <StatCard 
-          title="Active Players" 
-          value={playersInGame} 
+        <StatCard
+          title="Active Players"
+          value={playersInGame}
           total={totalPlayers}
           color="#4CAF50"
         />
-        <StatCard 
-          title="Active Teams" 
-          value={teamsInGame} 
+        <StatCard
+          title="Active Teams"
+          value={teamsInGame}
           total={totalTeams}
           color="#4CAF50"
         />
@@ -91,7 +92,7 @@ const GameManagementScreen = ({ route }) => {
   return (
     <View style={styles.container}>
       <DashboardHeader />
-      
+
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarStyle: {
@@ -118,6 +119,8 @@ const GameManagementScreen = ({ route }) => {
               iconName = focused ? 'person' : 'person-outline';
             } else if (route.name === 'Hub') {
               iconName = focused ? 'grid' : 'grid-outline';
+            } else if (route.name === 'Stats') {
+              iconName = focused ? 'stats-chart' : 'stats-chart-outline';
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -138,6 +141,11 @@ const GameManagementScreen = ({ route }) => {
           name="Hub"
           children={() => <HubScreen route={{ params: { gameLocation } }} />}
           options={{ title: 'Game Hub' }}
+        />
+        <Tab.Screen
+          name="Stats"
+          children={() => <StatsTab teams={teams} />}
+          options={{ title: 'Stats' }}
         />
       </Tab.Navigator>
     </View>
