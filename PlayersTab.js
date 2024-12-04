@@ -50,8 +50,19 @@ const PlayersTab = ({ teams, setTeams }) => {
 
     if (player.status === 'eliminated') {
       // Revive the player
-      const updatedTeams = [...teams];
-      updatedTeams[teamIndex].players[playerIndex].status = 'active';
+      const updatedTeams = teams.map((team, idx) => {
+        if (idx === teamIndex) {
+          const updatedPlayers = team.players.map((p, pIdx) => {
+            if (pIdx === playerIndex) {
+              return { ...p, status: 'active' };
+            }
+            return p;
+          });
+          return { ...team, players: updatedPlayers };
+        }
+        return team;
+      });
+
       setTeams(updatedTeams);
     } else {
       // Eliminate the player and select the eliminator
@@ -62,21 +73,35 @@ const PlayersTab = ({ teams, setTeams }) => {
 
   const handleEliminatorSelect = (eliminator) => {
     const { teamIndex, playerIndex } = selectedEliminatedPlayer;
-    const updatedTeams = [...teams];
 
-    // Update eliminated player's status
-    updatedTeams[teamIndex].players[playerIndex].status = 'eliminated';
-
-    // Increment eliminator's kills
-    updatedTeams.forEach((team) => {
-      team.players.forEach((player) => {
-        if (player.name === eliminator.name) {
-          player.kills = (player.kills || 0) + 1;
-        }
-      });
+    const updatedTeams = teams.map((team, idx) => {
+      if (idx === teamIndex) {
+        const updatedPlayers = team.players.map((player, pIdx) => {
+          if (pIdx === playerIndex) {
+            return { ...player, status: 'eliminated' };
+          }
+          return player;
+        });
+        return { ...team, players: updatedPlayers };
+      }
+      return team;
     });
 
-    setTeams(updatedTeams);
+    // Increment eliminator's kills
+    const finalTeams = updatedTeams.map((team) => {
+      if (team.name === eliminator.teamName) {
+        const updatedPlayers = team.players.map((player) => {
+          if (player.name === eliminator.name) {
+            return { ...player, kills: (player.kills || 0) + 1 };
+          }
+          return player;
+        });
+        return { ...team, players: updatedPlayers };
+      }
+      return team;
+    });
+
+    setTeams(finalTeams);
     setIsEliminatorModalVisible(false);
     setSelectedEliminatedPlayer(null);
   };
@@ -124,7 +149,7 @@ const PlayersTab = ({ teams, setTeams }) => {
       {team.players.map((player, playerIndex) => (
         <PlayerCard
           key={`${teamIndex}-${playerIndex}`}
-          player={player}
+          player={{ ...player, teamName: team.name }}
           teamIndex={teamIndex}
           playerIndex={playerIndex}
         />
@@ -185,7 +210,9 @@ const PlayersTab = ({ teams, setTeams }) => {
           <Text style={styles.modalTitle}>Select Eliminator</Text>
           <FlatList
             data={teams.flatMap((team) =>
-              team.players.filter((p) => p.status === 'active')
+              team.players
+                .filter((p) => p.status === 'active')
+                .map((p) => ({ ...p, teamName: team.name }))
             )}
             keyExtractor={(item) => item.name}
             renderItem={({ item }) => (
@@ -194,6 +221,7 @@ const PlayersTab = ({ teams, setTeams }) => {
                 onPress={() => handleEliminatorSelect(item)}
               >
                 <Text style={styles.playerOptionText}>{item.name}</Text>
+                <Text style={styles.playerTeamText}>{item.teamName}</Text>
               </TouchableOpacity>
             )}
           />
@@ -446,10 +474,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
+  playerTeamText: {
+    color: '#666',
+    fontSize: 14,
+  },
   closeButtonText: {
     color: '#4CAF50',
     fontSize: 16,
     marginTop: 16,
+    textAlign: 'center',
   },
 });
 
