@@ -25,12 +25,15 @@ const TeamsTab = ({ teams, setTeams }) => {
       return;
     }
 
-    setTeams([...teams, { 
-      name: newTeamName.trim(), 
-      players: [], 
-      status: 'active',
-      createdAt: new Date()
-    }]);
+    setTeams(prevTeams => [
+      ...prevTeams,
+      { 
+        name: newTeamName.trim(), 
+        players: [], 
+        status: 'active',
+        createdAt: new Date()
+      }
+    ]);
     setNewTeamName('');
     setIsModalVisible(false);
   };
@@ -46,9 +49,17 @@ const TeamsTab = ({ teams, setTeams }) => {
           onPress: () => {
             setLoading(true);
             setTimeout(() => {
-              const updatedTeams = [...teams];
-              updatedTeams[index].status = updatedTeams[index].status === 'active' ? 'eliminated' : 'active';
-              setTeams(updatedTeams);
+              setTeams(prevTeams => {
+                return prevTeams.map((team, idx) => {
+                  if (idx === index) {
+                    return {
+                      ...team,
+                      status: team.status === 'active' ? 'eliminated' : 'active',
+                    };
+                  }
+                  return team;
+                });
+              });
               setLoading(false);
             }, 500);
           }
@@ -67,68 +78,70 @@ const TeamsTab = ({ teams, setTeams }) => {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            const updatedTeams = [...teams];
-            updatedTeams.splice(index, 1);
-            setTeams(updatedTeams);
+            setTeams(prevTeams => prevTeams.filter((_, idx) => idx !== index));
           }
         }
       ]
     );
   };
 
-  const TeamCard = ({ team, index }) => (
-    <View style={[
-      styles.teamCard,
-      team.status === 'eliminated' && styles.eliminatedTeam
-    ]}>
-      <TouchableOpacity 
-        style={styles.deleteButton}
-        onPress={() => deleteTeam(index)}
-      >
-        <Ionicons name="trash-outline" size={16} color="#ff4444" />
-      </TouchableOpacity>
+  const TeamCard = ({ team, index }) => {
+    const activePlayersCount = team.players.filter(player => player.status === 'active').length;
 
-      <View style={styles.teamInfo}>
-        <View style={[
-          styles.teamIconContainer,
-          team.status === 'eliminated' && styles.eliminatedIcon
-        ]}>
-          <Text style={styles.teamIcon}>
-            {team.name.charAt(0).toUpperCase()}
-          </Text>
-        </View>
-        
-        <View style={styles.teamDetails}>
-          <Text style={styles.teamName}>{team.name}</Text>
-          <View style={styles.statsRow}>
-            <Text style={[
-              styles.statusBadge,
-              team.status === 'active' ? styles.activeBadge : styles.eliminatedBadge
-            ]}>
-              {team.status === 'active' ? 'Active' : 'Eliminated'}
-            </Text>
-            <Text style={styles.playerCount}>
-              {team.players.length} Players
+    return (
+      <View style={[
+        styles.teamCard,
+        team.status === 'eliminated' && styles.eliminatedTeam
+      ]}>
+        <TouchableOpacity 
+          style={styles.deleteButton}
+          onPress={() => deleteTeam(index)}
+        >
+          <Ionicons name="trash-outline" size={16} color="#ff4444" />
+        </TouchableOpacity>
+
+        <View style={styles.teamInfo}>
+          <View style={[
+            styles.teamIconContainer,
+            team.status === 'eliminated' && styles.eliminatedIcon
+          ]}>
+            <Text style={styles.teamIcon}>
+              {team.name.charAt(0).toUpperCase()}
             </Text>
           </View>
+          
+          <View style={styles.teamDetails}>
+            <Text style={styles.teamName}>{team.name}</Text>
+            <View style={styles.statsRow}>
+              <Text style={[
+                styles.statusBadge,
+                team.status === 'active' ? styles.activeBadge : styles.eliminatedBadge
+              ]}>
+                {team.status === 'active' ? 'Active' : 'Eliminated'}
+              </Text>
+              <Text style={styles.playerCount}>
+                {activePlayersCount} Active Player{activePlayersCount !== 1 ? 's' : ''}
+              </Text>
+            </View>
+          </View>
         </View>
-      </View>
 
-      <TouchableOpacity 
-        style={[
-          styles.actionButton,
-          team.status === 'active' ? styles.eliminateButton : styles.reinstateButton
-        ]}
-        onPress={() => toggleTeamStatus(index)}
-      >
-        <Ionicons 
-          name={team.status === 'active' ? 'close-circle' : 'refresh-circle'} 
-          size={24} 
-          color={team.status === 'active' ? '#ff4444' : '#4CAF50'} 
-        />
-      </TouchableOpacity>
-    </View>
-  );
+        <TouchableOpacity 
+          style={[
+            styles.actionButton,
+            team.status === 'active' ? styles.eliminateButton : styles.reinstateButton
+          ]}
+          onPress={() => toggleTeamStatus(index)}
+        >
+          <Ionicons 
+            name={team.status === 'active' ? 'close-circle' : 'refresh-circle'} 
+            size={24} 
+            color={team.status === 'active' ? '#ff4444' : '#4CAF50'} 
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>

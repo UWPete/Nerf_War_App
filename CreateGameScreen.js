@@ -1,14 +1,14 @@
 // CreateGameScreen.js
 
 import React, { useState } from 'react';
-import { 
-  View, 
-  TextInput, 
-  StyleSheet, 
-  Alert, 
-  Text, 
-  TouchableOpacity, 
-  Modal, 
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  Alert,
+  Text,
+  TouchableOpacity,
+  Modal,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -27,6 +27,7 @@ const CreateGameScreen = () => {
   const [rulesVisible, setRulesVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const rulesList = [
     'Players must use approved Nerf guns only',
@@ -143,15 +144,27 @@ const CreateGameScreen = () => {
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Game Password</Text>
-            <TextInput
-              placeholder="Enter game password (6-20 characters)"
-              placeholderTextColor="#666"
-              value={gamePassword}
-              onChangeText={setGamePassword}
-              secureTextEntry
-              style={styles.input}
-              maxLength={20}
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                placeholder="Enter game password (6-20 characters)"
+                placeholderTextColor="#666"
+                value={gamePassword}
+                onChangeText={setGamePassword}
+                secureTextEntry={!isPasswordVisible}
+                style={[styles.input, styles.passwordInput]}
+                maxLength={20}
+              />
+              <TouchableOpacity
+                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                style={styles.passwordToggle}
+              >
+                <Ionicons
+                  name={isPasswordVisible ? "eye-off" : "eye"}
+                  size={24}
+                  color="#666"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
@@ -166,8 +179,8 @@ const CreateGameScreen = () => {
             />
           </View>
 
-          <TouchableOpacity 
-            style={styles.rulesButton} 
+          <TouchableOpacity
+            style={styles.rulesButton}
             onPress={() => setRulesVisible(true)}
           >
             <Ionicons name="shield-checkmark-outline" size={24} color="#4CAF50" />
@@ -175,11 +188,11 @@ const CreateGameScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
             styles.createButton,
             (!gameName.trim() || !location.trim() || !gamePassword) && styles.createButtonDisabled
-          ]} 
+          ]}
           onPress={createGame}
           disabled={!gameName.trim() || !location.trim() || !gamePassword}
         >
@@ -196,8 +209,8 @@ const CreateGameScreen = () => {
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Official Rules</Text>
-                <TouchableOpacity 
-                  style={styles.closeIcon} 
+                <TouchableOpacity
+                  style={styles.closeIcon}
                   onPress={() => setRulesVisible(false)}
                 >
                   <Ionicons name="close" size={24} color="#666" />
@@ -213,8 +226,8 @@ const CreateGameScreen = () => {
                 ))}
               </ScrollView>
 
-              <TouchableOpacity 
-                style={styles.acceptButton} 
+              <TouchableOpacity
+                style={styles.acceptButton}
                 onPress={() => setRulesVisible(false)}
               >
                 <Text style={styles.acceptButtonText}>I Understand</Text>
@@ -232,6 +245,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  passwordInput: {
+    flex: 1,
+    paddingRight: 50,
+  },
+  passwordToggle: {
+    position: 'absolute',
+    right: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
   scrollContainer: {
     padding: 20,
   },
