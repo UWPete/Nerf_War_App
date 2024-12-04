@@ -52,10 +52,25 @@ const PlayersTab = ({ teams, setTeams }) => {
         {
           text: 'Confirm',
           onPress: () => {
-            const updatedTeams = [...teams];
-            const player = updatedTeams[teamIndex].players[playerIndex];
-            player.status = player.status === 'active' ? 'eliminated' : 'active';
-            setTeams(updatedTeams);
+            setTeams(prevTeams => {
+              return prevTeams.map((team, tIndex) => {
+                if (tIndex === teamIndex) {
+                  return {
+                    ...team,
+                    players: team.players.map((player, pIndex) => {
+                      if (pIndex === playerIndex) {
+                        return {
+                          ...player,
+                          status: player.status === 'active' ? 'eliminated' : 'active',
+                        };
+                      }
+                      return player;
+                    }),
+                  };
+                }
+                return team;
+              });
+            });
           }
         }
       ]
@@ -131,9 +146,9 @@ const PlayersTab = ({ teams, setTeams }) => {
           </View>
           
           <ScrollView style={styles.teamList}>
-            {teams.map((team) => (
+            {teams.map((team, index) => (
               <TouchableOpacity
-                key={team.name}
+                key={index}
                 style={styles.teamOption}
                 onPress={() => {
                   setSelectedTeam(team.name);
@@ -198,6 +213,13 @@ const PlayersTab = ({ teams, setTeams }) => {
         )}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Ionicons name="people-outline" size={48} color="#666" />
+            <Text style={styles.emptyText}>No teams available</Text>
+            <Text style={styles.emptySubtext}>Please add teams to manage players.</Text>
+          </View>
+        }
       />
 
       <TeamSelectorModal />
@@ -374,6 +396,22 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 8,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    padding: 40,
+  },
+  emptyText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    color: '#666',
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
   },
 });
 
