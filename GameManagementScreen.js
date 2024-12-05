@@ -139,7 +139,7 @@ const GameManagementScreen = ({ route }) => {
         />
         <Tab.Screen
           name="Hub"
-          children={() => <HubScreen route={{ params: { gameLocation } }} />}
+          children={() => <HubScreen route={{ params: { gameLocation, gameId: route.params.gameId } }} />}
           options={{ title: 'Game Hub' }}
         />
         <Tab.Screen

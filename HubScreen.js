@@ -1,5 +1,3 @@
-// HubScreen.js
-
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   View, 
@@ -18,14 +16,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { auth } from './firebaseConfig';
 import * as Location from 'expo-location';
 
-const HubScreen = ({ route }) => {
+const HubScreen = ({ route, navigation }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const flatListRef = useRef(null);
   const [location, setLocation] = useState(null);
   const [locationLoading, setLocationLoading] = useState(true);
 
-  const { gameLocation } = route.params;
+  const { gameLocation, gameId } = route.params;
 
   useEffect(() => {
     // Use the location passed from GameManagementScreen
@@ -85,6 +83,14 @@ const HubScreen = ({ route }) => {
     }, 100);
   };
 
+  const navigateToLocationTab = () => {
+    if (gameId) {
+      navigation.navigate('LocationTab', { gameId });
+    } else {
+      Alert.alert('Error', 'Game ID not available');
+    }
+  };
+
   const MessageBubble = ({ message }) => (
     <View style={[
       styles.messageBubbleContainer,
@@ -125,12 +131,16 @@ const HubScreen = ({ route }) => {
         <ActivityIndicator size="large" color="#4CAF50" style={{ marginTop: 20 }} />
       ) : (
         location && (
-          <View style={styles.locationContainer}>
+          <TouchableOpacity 
+            style={styles.locationContainer} 
+            onPress={navigateToLocationTab}
+          >
             <Ionicons name="location-outline" size={24} color="#4CAF50" />
             <Text style={styles.locationText}>
               Game Location: Latitude {location.latitude.toFixed(6)}, Longitude {location.longitude.toFixed(6)}
             </Text>
-          </View>
+            <Ionicons name="chevron-forward" size={20} color="#4CAF50" />
+          </TouchableOpacity>
         )
       )}
 
@@ -207,6 +217,7 @@ const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 10,
     backgroundColor: '#161616',
@@ -217,6 +228,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     marginLeft: 8,
+    flex: 1,
   },
   messageList: {
     padding: 16,

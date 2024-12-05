@@ -1,5 +1,3 @@
-// App.js
-
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -14,7 +12,8 @@ import JoinGameScreen from './JoinGameScreen';
 import PlayersScreen from './PlayersScreen';
 import TeamsScreen from './TeamsScreen';
 import AboutScreen from './AboutScreen';
-import GameManagementScreen from './GameManagementScreen'; // Import the GameManagementScreen
+import GameManagementScreen from './GameManagementScreen';
+import LocationTab from './LocationTab';
 
 const Stack = createStackNavigator();
 
@@ -75,6 +74,16 @@ export default function App() {
               name="GameManagementScreen"
               component={GameManagementScreen}
               options={{ title: 'Manage Game', headerShown: false }}
+            />
+            <Stack.Screen
+              name="LocationTab"
+              component={LocationTab}
+              options={{ 
+                title: 'Game Location',
+                headerStyle: { backgroundColor: '#000' },
+                headerTintColor: '#fff',
+                headerTitleStyle: { color: '#fff' }
+              }}
             />
           </>
         ) : (
