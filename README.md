@@ -2,12 +2,14 @@ Creating README since there is an issue with how github is tracking individual c
 
 Contributions:
 
-Garrett:
+**Garrett:**
+ -
  - added about page
  - added rules pop out
  - added functionality for navigating from game pages back to main dashboard
 
-Peter:
+**Peter:**
+-
 - Initial React Native project setup and configuration
 - Database connectivity implementation via Firebase
 - Sign in/Sign out page -- storage functionality and UI
