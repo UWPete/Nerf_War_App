@@ -3,14 +3,17 @@ Creating README since there is an issue with how github is tracking individual c
 Contributions:
 
 Garrett:
- - 
- - Created the sign on page
  - added about page
  - added rules pop out
  - added functionality for navigating from game pages back to main dashboard
 
 Peter:
- - 
+- Initial React Native project setup and configuration
+- Database connectivity implementation via Firebase
+- Sign in/Sign out page -- storage functionality and UI
+- Database storing of games information (location, hostID, maxPlayers, etc.) and users information (email, uid)
+- Major final UI updates with black and white minimalist design and functionality improvements
+- Added and updated custom project logos
 
 Dylan:
  - 
