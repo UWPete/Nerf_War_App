@@ -15,8 +15,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { auth } from './firebaseConfig';
 import * as Location from 'expo-location';
+import { useNavigation } from '@react-navigation/native';
 
-const HubScreen = ({ route, navigation }) => {
+const HubScreen = ({ route }) => {
+  const navigation = useNavigation();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const flatListRef = useRef(null);
@@ -26,12 +28,10 @@ const HubScreen = ({ route, navigation }) => {
   const { gameLocation, gameId } = route.params;
 
   useEffect(() => {
-    // Use the location passed from GameManagementScreen
     if (gameLocation) {
       setLocation(gameLocation);
       setLocationLoading(false);
     } else {
-      // If no location is passed, request location permission and get current location
       (async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
@@ -77,7 +77,6 @@ const HubScreen = ({ route, navigation }) => {
     setMessages(prev => [...prev, message]);
     setNewMessage('');
     
-    // Scroll to bottom after sending message
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
@@ -85,7 +84,10 @@ const HubScreen = ({ route, navigation }) => {
 
   const navigateToLocationTab = () => {
     if (gameId) {
-      navigation.navigate('LocationTab', { gameId });
+      navigation.navigate('LocationTab', { 
+        gameId: gameId,
+        location: location
+      });
     } else {
       Alert.alert('Error', 'Game ID not available');
     }
@@ -134,6 +136,7 @@ const HubScreen = ({ route, navigation }) => {
           <TouchableOpacity 
             style={styles.locationContainer} 
             onPress={navigateToLocationTab}
+            activeOpacity={0.7}
           >
             <Ionicons name="location-outline" size={24} color="#4CAF50" />
             <Text style={styles.locationText}>

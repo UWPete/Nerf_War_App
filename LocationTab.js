@@ -1,27 +1,31 @@
-// LocationTab.js
-
 import React, { useEffect, useState } from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
   ActivityIndicator, 
-  TouchableOpacity, 
-  Linking,
-  Alert 
+  Platform,
+  Dimensions
 } from 'react-native';
 import { db } from './firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
+import MapView, { Marker, Circle } from 'react-native-maps';
 
 const LocationTab = ({ route }) => {
-  const { gameId } = route.params;
+  const { gameId, location } = route.params;
   const [gameData, setGameData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [playerLocations, setPlayerLocations] = useState([]);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     fetchGameData();
+    fetchPlayerLocations();
+    // Set up real-time updates for player locations
+    const interval = setInterval(fetchPlayerLocations, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
   }, [gameId]);
 
   const fetchGameData = async () => {
@@ -41,21 +45,30 @@ const LocationTab = ({ route }) => {
     }
   };
 
-  const openMaps = () => {
-    if (!gameData?.location) return;
-    
-    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(gameData.location)}`;
-    Linking.canOpenURL(mapsUrl)
-      .then(supported => {
-        if (supported) {
-          return Linking.openURL(mapsUrl);
+  const fetchPlayerLocations = async () => {
+    try {
+      const playersRef = collection(db, 'games', gameId, 'players');
+      const playersSnapshot = await getDocs(playersRef);
+      const locations = [];
+      
+      playersSnapshot.forEach(doc => {
+        const playerData = doc.data();
+        if (playerData.location) {
+          locations.push({
+            id: doc.id,
+            ...playerData
+          });
         }
-        Alert.alert('Error', 'Unable to open maps application');
-      })
-      .catch(error => {
-        console.error('Error opening maps:', error);
-        Alert.alert('Error', 'Failed to open maps');
       });
+      
+      setPlayerLocations(locations);
+    } catch (error) {
+      console.error('Error fetching player locations:', error);
+    }
+  };
+
+  const onMapReady = () => {
+    setMapReady(true);
   };
 
   if (loading) {
@@ -71,15 +84,40 @@ const LocationTab = ({ route }) => {
       <View style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={48} color="#ff4444" />
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity 
-          style={styles.retryButton} 
-          onPress={fetchGameData}
-        >
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
       </View>
     );
   }
+
+  // Custom map style for dark theme
+  const mapStyle = [
+    {
+      "elementType": "geometry",
+      "stylers": [{ "color": "#242f3e" }]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [{ "color": "#746855" }]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [{ "color": "#242f3e" }]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#38414e" }]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry.stroke",
+      "stylers": [{ "color": "#212a37" }]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#17263c" }]
+    }
+  ];
 
   return (
     <View style={styles.container}>
@@ -88,16 +126,81 @@ const LocationTab = ({ route }) => {
           <Ionicons name="location" size={24} color="#4CAF50" />
           <Text style={styles.cardTitle}>Game Location</Text>
         </View>
-        
-        <Text style={styles.location}>{gameData?.location}</Text>
 
-        <TouchableOpacity 
-          style={styles.mapsButton}
-          onPress={openMaps}
-        >
-          <Ionicons name="map-outline" size={20} color="#fff" />
-          <Text style={styles.mapsButtonText}>Open in Maps</Text>
-        </TouchableOpacity>
+        <View style={styles.statusBar}>
+          <View style={styles.statusItem}>
+            <Text style={styles.statusLabel}>Players Online</Text>
+            <Text style={styles.statusValue}>{playerLocations.length}</Text>
+          </View>
+          <View style={styles.statusDivider} />
+          <View style={styles.statusItem}>
+            <Text style={styles.statusLabel}>Active Players</Text>
+            <Text style={styles.statusValue}>
+              {playerLocations.filter(p => p.status === 'active').length}
+            </Text>
+          </View>
+        </View>
+        
+        <View style={styles.mapContainer}>
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude: location?.latitude || 37.78825,
+              longitude: location?.longitude || -122.4324,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+            customMapStyle={mapStyle}
+            onMapReady={onMapReady}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
+            showsCompass={true}
+          >
+            {mapReady && location && (
+              <>
+                <Marker
+                  coordinate={{
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                  }}
+                  title="Game Center"
+                >
+                  <View style={styles.centerMarker}>
+                    <Ionicons name="flag" size={30} color="#4CAF50" />
+                  </View>
+                </Marker>
+                <Circle
+                  center={{
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                  }}
+                  radius={1000}
+                  fillColor="rgba(76, 175, 80, 0.2)"
+                  strokeColor="rgba(76, 175, 80, 0.5)"
+                  strokeWidth={2}
+                />
+                {playerLocations.map((player) => (
+                  <Marker
+                    key={player.id}
+                    coordinate={{
+                      latitude: player.location.latitude,
+                      longitude: player.location.longitude
+                    }}
+                    title={player.name || player.email?.split('@')[0]}
+                    description={`Status: ${player.status}`}
+                  >
+                    <View style={[
+                      styles.playerMarker,
+                      { backgroundColor: player.status === 'active' ? '#4CAF50' : '#ff4444' }
+                    ]}>
+                      <Ionicons name="person" size={20} color="#fff" />
+                    </View>
+                  </Marker>
+                ))}
+              </>
+            )}
+          </MapView>
+        </View>
       </View>
 
       <View style={styles.card}>
@@ -126,14 +229,6 @@ const LocationTab = ({ route }) => {
           <Text style={styles.ruleText}>No gameplay during school/work hours</Text>
         </View>
       </View>
-
-      <TouchableOpacity 
-        style={styles.refreshButton}
-        onPress={fetchGameData}
-      >
-        <Ionicons name="refresh" size={20} color="#666" />
-        <Text style={styles.refreshButtonText}>Refresh Location</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -163,19 +258,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     textAlign: 'center',
   },
-  retryButton: {
-    marginTop: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: '#161616',
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  retryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
   card: {
     backgroundColor: '#161616',
     borderRadius: 12,
@@ -195,24 +277,57 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-  location: {
-    fontSize: 16,
-    color: '#fff',
-    marginBottom: 16,
-  },
-  mapsButton: {
+  statusBar: {
     flexDirection: 'row',
+    backgroundColor: '#000',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  statusItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statusDivider: {
+    width: 1,
+    backgroundColor: '#333',
+    marginHorizontal: 12,
+  },
+  statusLabel: {
+    color: '#666',
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  statusValue: {
+    color: '#4CAF50',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  mapContainer: {
+    height: 300,
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  map: {
+    flex: 1,
+  },
+  centerMarker: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4CAF50',
-    padding: 12,
-    borderRadius: 8,
-    gap: 8,
   },
-  mapsButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  playerMarker: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#4CAF50',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   ruleItem: {
     flexDirection: 'row',
@@ -224,21 +339,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     flex: 1,
-  },
-  refreshButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#161616',
-    borderWidth: 1,
-    borderColor: '#333',
-  },
-  refreshButtonText: {
-    color: '#666',
-    fontSize: 14,
   },
 });
 
