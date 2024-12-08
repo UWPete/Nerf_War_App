@@ -2,15 +2,23 @@ Creating README since there is an issue with how github is tracking individual c
 
 Contributions:
 
-Garrett:
+**Garrett:**
  - 
- - Created the sign on page
- - added about page
- - added rules pop out
- - added functionality for navigating from game pages back to main dashboard
+ - Created origin Kotlin app that we decided not to move forward with
+ - Added about page
+ - Added rules pop out
+ - Added navigation functionality to various pages in app
+ - Added password visibility
+ - Created Main Dashboard 
 
-Peter:
- - 
+**Peter:**
+-
+- Initial React Native project setup and configuration
+- Database connectivity implementation via Firebase
+- Sign in/Sign out page -- storage functionality and UI
+- Database storing of games information (location, hostID, maxPlayers, etc.) and users information (email, uid)
+- Major final UI updates with black and white minimalist design and functionality improvements
+- Added and updated custom project logos
 
 Dylan:
  - 
@@ -22,4 +30,9 @@ Dylan:
 
 Sebastian:
  - 
-git 
+ - Implemented logic for game creation and game management
+ - Helped set up UI for hub, players, and teams tabs
+ - Implemented point logic for tracking kills by team and players via elimination button and eliminated by dropdown
+ - Set up UI and trackers for the stats page
+ - Implemented React Native Map and set up Location page through the Hub
+ - Set up UI on Location page with number for online and active players on the map
