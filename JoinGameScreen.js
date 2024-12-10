@@ -1,5 +1,3 @@
-// JoinGameScreen.js
-
 import React, { useEffect, useState } from 'react';
 import { 
   View, 
@@ -10,7 +8,8 @@ import {
   ActivityIndicator, 
   FlatList,
   Modal,
-  TextInput
+  TextInput,
+  SafeAreaView
 } from 'react-native';
 import { db, auth } from './firebaseConfig';
 import { collection, getDocs, addDoc, updateDoc, doc, getDoc, setDoc, increment } from 'firebase/firestore';
@@ -58,13 +57,13 @@ const JoinGameScreen = () => {
   const verifyAndJoinGame = async () => {
     if (!selectedGame || !gamePassword) return;
 
-    if (gamePassword !== selectedGame.password) {
-      Alert.alert('Error', 'Incorrect password');
-      return;
-    }
-
     try {
       setLoading(true);
+
+      if (gamePassword !== selectedGame.password) {
+        Alert.alert('Error', 'Incorrect password');
+        return;
+      }
 
       // Check if user document exists, create if it doesn't
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
@@ -99,7 +98,9 @@ const JoinGameScreen = () => {
       });
 
       setPasswordModalVisible(false);
-      navigation.navigate('GameScreen', { gameId: selectedGame.id });
+      navigation.replace('GameScreen', { 
+        gameId: selectedGame.id 
+      });
     } catch (error) {
       console.error('Error joining game:', error);
       Alert.alert('Error', 'Failed to join game. Please try again.');
@@ -152,7 +153,7 @@ const JoinGameScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
@@ -168,6 +169,8 @@ const JoinGameScreen = () => {
         renderItem={renderGameCard}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={true}
+        bounces={true}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="game-controller-outline" size={48} color="#666" />
@@ -219,13 +222,19 @@ const JoinGameScreen = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#000',
   },
   header: {
@@ -235,6 +244,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#161616',
     borderBottomWidth: 1,
     borderBottomColor: '#333',
+    zIndex: 1,
   },
   backButton: {
     padding: 8,
@@ -249,13 +259,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
   listContainer: {
+    flexGrow: 1,
     padding: 16,
   },
   gameCard: {

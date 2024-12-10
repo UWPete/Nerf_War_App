@@ -14,6 +14,7 @@ import TeamsScreen from './TeamsScreen';
 import AboutScreen from './AboutScreen';
 import GameManagementScreen from './GameManagementScreen';
 import LocationTab from './LocationTab';
+import GameScreen from './GameScreen';
 
 const Stack = createStackNavigator();
 
@@ -75,6 +76,11 @@ export default function App() {
               component={GameManagementScreen}
               options={{ title: 'Manage Game', headerShown: false }}
             />
+            <Stack.Screen
+              name="GameScreen"
+              component={GameScreen}
+              options={{ headerShown: false }}
+            />            
             <Stack.Screen
               name="LocationTab"
               component={LocationTab}
