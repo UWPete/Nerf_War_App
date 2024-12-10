@@ -63,13 +63,14 @@ const GameManagementScreen = ({ route }) => {
   const DashboardHeader = () => (
     <View style={styles.dashboard}>
       <View style={styles.headerTop}>
-        <Text style={styles.title}>{gameName}</Text>
-        <TouchableOpacity
+      <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.navigate('AuthenticatedScreen')}
         >
           <Ionicons name="arrow-back" size={24} color="#666" />
         </TouchableOpacity>
+        <Text style={styles.title}>{gameName}</Text>
+        
       </View>
 
       <View style={styles.statsContainer}>
@@ -165,14 +166,16 @@ const styles = StyleSheet.create({
   },
   headerTop: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
+    position: 'relative',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
+    flex: 1,
+    textAlign: 'center',
   },
   backButton: {
     padding: 8,
@@ -180,6 +183,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     borderWidth: 1,
     borderColor: '#333',
+    position: 'absolute', // Position absolutely
+    left: 0, // Stick to the left
+    zIndex: 1,
   },
   statsContainer: {
     flexDirection: 'row',
