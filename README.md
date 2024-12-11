@@ -27,6 +27,7 @@ Dylan:
  - Added the total number of active players and teams
  - Helped add the logic for changing active status of players and teams
  - Helped with functionality of buttons on game page and create game page
+ - Players, Teams, Tab Pages - structure and user interactivty
 
 Sebastian:
  - 
